@@ -1,0 +1,159 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=content-language content="en"><meta name=color-scheme content="light dark"><meta http-equiv=content-security-policy content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self'; connect-src 'self' https://www.google-analytics.com;"><meta name=author content="Mohamed Hamza"><meta name=description content="How to deploy Kubernetes vClusters inside your namespaces.    A couple of days ago I stumbled upon DigitalOcean Kubernetes Challenge. It sounds like a great idea. I loved how DO is trying to open up more opportunities to the tech community to play and learn Kubernetes through these hands-on challenges.
+So I thought, I need to do my share of helping people myself. So I&rsquo;ve decided to choose one of their Kubernetes expert Challenges and solve and document it."><meta name=keywords content="blog,developer,personal"><meta name=twitter:card content="summary"><meta name=twitter:title content="How to deploy Kubernetes vClusters inside your namespaces"><meta name=twitter:description content="How to deploy Kubernetes vClusters inside your namespaces.    A couple of days ago I stumbled upon DigitalOcean Kubernetes Challenge. It sounds like a great idea. I loved how DO is trying to open up more opportunities to the tech community to play and learn Kubernetes through these hands-on challenges.
+So I thought, I need to do my share of helping people myself. So I&rsquo;ve decided to choose one of their Kubernetes expert Challenges and solve and document it."><meta property="og:title" content="How to deploy Kubernetes vClusters inside your namespaces"><meta property="og:description" content="How to deploy Kubernetes vClusters inside your namespaces.    A couple of days ago I stumbled upon DigitalOcean Kubernetes Challenge. It sounds like a great idea. I loved how DO is trying to open up more opportunities to the tech community to play and learn Kubernetes through these hands-on challenges.
+So I thought, I need to do my share of helping people myself. So I&rsquo;ve decided to choose one of their Kubernetes expert Challenges and solve and document it."><meta property="og:type" content="article"><meta property="og:url" content="https://0xmh.github.io/posts/how-to-deploy-kubernetes-vclusters-inside-your-namespaces/"><meta property="article:published_time" content="2021-12-05T01:34:38+02:00"><meta property="article:modified_time" content="2021-12-05T01:34:38+02:00"><title>How to deploy Kubernetes vClusters inside your namespaces · MH</title><link rel=canonical href=https://0xmh.github.io/posts/how-to-deploy-kubernetes-vclusters-inside-your-namespaces/><link rel=preload href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as=font type=font/woff2 crossorigin><link rel=stylesheet href=/css/coder.min.843ee18d510f7cb1bb49110db117b99ea65489c095d620a5d79ea71693478e77.css integrity="sha256-hD7hjVEPfLG7SRENsRe5nqZUicCV1iCl156nFpNHjnc=" crossorigin=anonymous media=screen><link rel=stylesheet href=/css/coder-dark.min.aa883b9ce35a8ff4a2a5008619005175e842bb18a8a9f9cc2bbcf44dab2d91fa.css integrity="sha256-qog7nONaj/SipQCGGQBRdehCuxioqfnMK7z0Tastkfo=" crossorigin=anonymous media=screen><link rel=icon type=image/png href=/images/favicon-32x32.png sizes=32x32><link rel=icon type=image/png href=/images/favicon-16x16.png sizes=16x16><link rel=apple-touch-icon href=/images/apple-touch-icon.png><link rel=apple-touch-icon sizes=180x180 href=/images/apple-touch-icon.png><meta name=generator content="Hugo 0.80.0"></head><body class="preload-transitions colorscheme-auto"><div class=float-container><a id=dark-mode-toggle class=colorscheme-toggle><i class="fa fa-adjust fa-fw" aria-hidden=true></i></a></div><main class=wrapper><nav class=navigation><section class=container><a class=navigation-title href=/>MH</a>
+<input type=checkbox id=menu-toggle>
+<label class="menu-button float-right" for=menu-toggle><i class="fa fa-bars fa-fw" aria-hidden=true></i></label><ul class=navigation-list><li class=navigation-item><a class=navigation-link href=/about/>About</a></li><li class=navigation-item><a class=navigation-link href=/posts/>Posts</a></li><li class=navigation-item><a class=navigation-link href=/contact/>Contact me</a></li><li class="navigation-item menu-separator"><span>|</span></li><li class=navigation-item><a href=https://0xmh.github.io/ar/>العربية</a></li><li class=navigation-item><a href=https://0xmh.github.io/pt-br/></a></li></ul></section></nav><div class=content><section class="container post"><article><header><div class=post-title><h1 class=title><a class=title-link href=https://0xmh.github.io/posts/how-to-deploy-kubernetes-vclusters-inside-your-namespaces/>How to deploy Kubernetes vClusters inside your namespaces</a></h1></div><div class=post-meta><div class=date><span class=posted-on><i class="fa fa-calendar" aria-hidden=true></i><time datetime=2021-12-05T01:34:38+02:00>December 5, 2021</time></span>
+<span class=reading-time><i class="fa fa-clock-o" aria-hidden=true></i>8-minute read</span></div><div class=categories><i class="fa fa-folder" aria-hidden=true></i><a href=/categories/development/>Development</a>
+<span class=separator>•</span>
+<a href=/categories/kubernetes/>kubernetes</a></div><div class=tags><i class="fa fa-tag" aria-hidden=true></i><span class=tag><a href=/tags/kubernetes/>kubernetes</a></span></div></div></header><div><h1 id=how-to-deploy-kubernetes-vclusters-inside-your-namespaces>How to deploy Kubernetes vClusters inside your namespaces.
+<a class=heading-link href=#how-to-deploy-kubernetes-vclusters-inside-your-namespaces><i class="fa fa-link" aria-hidden=true></i></a></h1><p>A couple of days ago I stumbled upon DigitalOcean Kubernetes Challenge. It sounds like a great idea. I loved how DO is trying to open up more opportunities to the tech community to play and learn Kubernetes through these hands-on challenges.</p><p>So I thought, I need to do my share of helping people myself. So I&rsquo;ve decided to choose one of their Kubernetes expert Challenges and solve and document it. I also thought I&rsquo;d take it one step further and implement everything in Infrastructure as Code (IaC) using Terraform.</p><p>In this blog, I&rsquo;ll explain the idea behind Kubernetes vClusters. How to get started with using them and How to provision your first Kubernetes Cluster in Digitial ocean. So Let&rsquo;s get started.</p><h3 id=provision-your-first-kubernetes-cluster-in-digitial-ocean>Provision your first Kubernetes Cluster in Digitial ocean
+<a class=heading-link href=#provision-your-first-kubernetes-cluster-in-digitial-ocean><i class="fa fa-link" aria-hidden=true></i></a></h3><p>We&rsquo;ll be using Terraform for this task. Terraform provides a module for DigitalOcean. You can find more info <a href=https://registry.terraform.io/providers/digitalocean/digitalocean/latest/docs>here</a>. The Kubernetes specific part can be found <a href=https://registry.terraform.io/providers/digitalocean/digitalocean/latest/docs/resources/kubernetes_cluster>here</a>.</p><p>So let&rsquo;s start with this script that provisions Kubernetes Cluster:
+Create a new <code>main.tf</code> file containing:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback># Deploy the actual Kubernetes cluster
+resource &#34;digitalocean_kubernetes_cluster&#34; &#34;kubernetes_cluster&#34; {
+  name    = &#34;terraform-do-cluster&#34;
+  region  = &#34;ams3&#34;
+  version = &#34;1.19.15-do.0&#34;
+
+  tags = [&#34;my-tag&#34;]
+
+  # This default node pool is mandatory
+  node_pool {
+    name       = &#34;default-pool&#34;
+    size       = &#34;s-2vcpu-4gb&#34; 
+    auto_scale = false
+    node_count = 2
+    tags       = [&#34;node-pool-tag&#34;]
+  }
+}
+</code></pre></div><p>Then create a new file <code>versions.tf</code>, We&rsquo;ll add DO terraform provider to this file:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback># Configure the DigitalOcean Provider
+terraform {
+  required_providers {
+    digitalocean = {
+      source = &#34;digitalocean/digitalocean&#34;
+      version = &#34;~&gt; 2.0&#34;
+    }
+  }
+}
+
+</code></pre></div><p>Before we run this script we need to create a new personal access token. So login to your Digital ocean account and head to the API section. Then click on &ldquo;Generate New Token&rdquo; button and generate a token with Read and Write Scope.</p><figure><img src=/how-to-deploy-kubernetes-vclusters-inside-your-namespaces/08d9d5507d964652b651c356fc4ae383.png alt="DigitalOcean Tocken"><figcaption><p>Create DigitalOcean Tocken</p></figcaption></figure><p>Then, We need to set up the DigitalOcean Terraform provider, It&rsquo;s very simple. You need to provide your previous DigitalOcean personal access token. You can either use a variable and the prompt (Don&rsquo;t commit your token!) or environment variables. The provider automatically uses <code>DIGITALOCEAN_TOKEN</code> and <code>DIGITALOCEAN_ACCESS_TOKEN</code> if they exist.</p><p>So let&rsquo;s create an environment variable with the name <code>DIGITALOCEAN_TOKEN</code></p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>export DIGITALOCEAN_TOKEN=&lt;Personal Tocken&gt;
+</code></pre></div><p>Now let&rsquo;s create the Kubernetes Cluster:</p><p>First, run <code>terraform init</code> to download the required providers</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ terraform init
+Initializing the backend...
+
+Initializing provider plugins...
+- Reusing previous version of digitalocean/digitalocean from the dependency lock file
+- Installing digitalocean/digitalocean v2.16.0...
+- Installed digitalocean/digitalocean v2.16.0 (signed by a HashiCorp partner, key ID F82037E524B9C0E8)
+
+Partner and community providers are signed by their developers.
+If you&#39;d like to know more about provider signing, you can read about it here:
+https://www.terraform.io/docs/cli/plugins/signing.html
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running &#34;terraform plan&#34; to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+</code></pre></div><p>Next, run <code>terraform plan</code> to verify what resources are planned to be created:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ terraform plan
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # digitalocean_kubernetes_cluster.kubernetes_cluster will be created
+  + resource &#34;digitalocean_kubernetes_cluster&#34; &#34;kubernetes_cluster&#34; {
+      + cluster_subnet = (known after apply)
+      + created_at     = (known after apply)
+      + endpoint       = (known after apply)
+      + ha             = false
+      + id             = (known after apply)
+      + ipv4_address   = (known after apply)
+      + kube_config    = (sensitive value)
+      + name           = &#34;terraform-do-cluster&#34;
+      + region         = &#34;ams3&#34;
+      + service_subnet = (known after apply)
+      + status         = (known after apply)
+      + surge_upgrade  = true
+      + tags           = [
+          + &#34;my-tag&#34;,
+        ]
+      + updated_at     = (known after apply)
+      + urn            = (known after apply)
+      + version        = &#34;1.19.15-do.0&#34;
+      + vpc_uuid       = (known after apply)
+
+      + maintenance_policy {
+          + day        = (known after apply)
+          + duration   = (known after apply)
+          + start_time = (known after apply)
+        }
+
+      + node_pool {
+          + actual_node_count = (known after apply)
+          + auto_scale        = false
+          + id                = (known after apply)
+          + name              = &#34;default-pool&#34;
+          + node_count        = 2
+          + nodes             = (known after apply)
+          + size              = &#34;s-1vcpu-2gb&#34;
+          + tags              = [
+              + &#34;node-pool-tag&#34;,
+            ]
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+
+Note: You didn&#39;t use the -out option to save this plan, so Terraform can&#39;t guarantee to take exactly these actions if you run &#34;terraform apply&#34; now.
+</code></pre></div><p>And finally, let’s apply the configuration through <code>terraform apply</code></p><p>During cluster provisioning, you will see the progress bar moving until the end.</p><figure><img src=/how-to-deploy-kubernetes-vclusters-inside-your-namespaces/d420db6f5a9e43f482abd10d78d6c29e.png alt="DigitalOcean kubernetes progress bar"></figure><h3 id=connect-to-the-kubernetes-cluster>Connect to the Kubernetes cluster
+<a class=heading-link href=#connect-to-the-kubernetes-cluster><i class="fa fa-link" aria-hidden=true></i></a></h3><p>Now let&rsquo;s connect to our Kubernetes cluster. To achieve that, we need to download the kubeconfig file. We will use <code>curl</code> to do this.</p><p>First, let’s create an environment variable with our cluster ID.</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ export CLUSTER_ID=&lt;Cluster ID&gt;
+</code></pre></div><p><strong>Note:</strong> You get the Cluster ID from your Kubernetes cluster dashboard.</p><figure><img src=/how-to-deploy-kubernetes-vclusters-inside-your-namespaces/c3c7b5e2c9e44d77b231bc60b62c0025.png alt="DigitalOcean Kubernetes Cluster ID"></figure><p>Next, let’s go ahead and download the Kube config file</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ curl -X GET -H <span style=font-style:italic>&#34;Content-Type: application/json&#34;</span> -H <span style=font-style:italic>&#34;Authorization: Bearer </span>$DIGITALOCEAN_TOKEN<span style=font-style:italic>&#34;</span>  <span style=font-style:italic>&#34;https://api.digitalocean.com/v2/kubernetes/clusters/</span>$CLUSTER_ID<span style=font-style:italic>/kubeconfig&#34;</span> &gt; config
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  2080    0  2080    0     0   3537      0 --:--:-- --:--:-- --:--:--  3531
+</code></pre></div><p>This will download a config file in your current directory.</p><p>Let’s now see if everything works as expected:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ export KUBECONFIG=./config
+$ kubectl get pod -A
+NAMESPACE     NAME                               READY   STATUS    RESTARTS   AGE
+kube-system   cilium-8bx4g                       1/1     Running   0          19m
+kube-system   cilium-kvrhq                       1/1     Running   0          19m
+kube-system   cilium-operator-7fd9d7b9dc-7mb6v   1/1     Running   0          22m
+kube-system   coredns-57877dc48d-4nh5j           1/1     Running   0          22m
+kube-system   coredns-57877dc48d-5g6r8           1/1     Running   0          22m
+kube-system   csi-do-node-7qpwp                  2/2     Running   0          19m
+kube-system   csi-do-node-l58dn                  2/2     Running   0          19m
+kube-system   do-node-agent-6w975                1/1     Running   0          19m
+kube-system   do-node-agent-lvvbq                1/1     Running   0          19m
+kube-system   kube-proxy-85mtl                   1/1     Running   0          19m
+kube-system   kube-proxy-8zgpd                   1/1     Running   0          19m
+</code></pre></div><p>Hooray! We built our first Kubernetes Cluster and it&rsquo;s working. Now we need to provision our vClusters, But before we do that let&rsquo;s check the current Kubernetes version:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ kubectl version
+Client Version: version.Info{Major:<span style=font-style:italic>&#34;1&#34;</span>, Minor:<span style=font-style:italic>&#34;22&#34;</span>, GitVersion:<span style=font-style:italic>&#34;v1.22.1&#34;</span>, GitCommit:<span style=font-style:italic>&#34;632ed300f2c34f6d6d15ca4cef3d3c7073412212&#34;</span>, GitTreeState:<span style=font-style:italic>&#34;clean&#34;</span>, BuildDate:<span style=font-style:italic>&#34;2021-08-19T15:38:26Z&#34;</span>, GoVersion:<span style=font-style:italic>&#34;go1.16.6&#34;</span>, Compiler:<span style=font-style:italic>&#34;gc&#34;</span>, Platform:<span style=font-style:italic>&#34;darwin/arm64&#34;</span>}
+Server Version: version.Info{Major:<span style=font-style:italic>&#34;1&#34;</span>, Minor:<span style=font-style:italic>&#34;19&#34;</span>, GitVersion:<span style=font-style:italic>&#34;v1.19.15&#34;</span>, GitCommit:<span style=font-style:italic>&#34;58178e7f7aab455bc8de88d3bdd314b64141e7ee&#34;</span>, GitTreeState:<span style=font-style:italic>&#34;clean&#34;</span>, BuildDate:<span style=font-style:italic>&#34;2021-09-15T19:18:00Z&#34;</span>, GoVersion:<span style=font-style:italic>&#34;go1.15.15&#34;</span>, Compiler:<span style=font-style:italic>&#34;gc&#34;</span>, Platform:<span style=font-style:italic>&#34;linux/amd64&#34;</span>}
+WARNING: version difference between client (1.22) and server (1.19) exceeds the supported minor version skew of +/-1
+
+</code></pre></div><p>From the <code>Server Version</code> above, We notice that the current version is Kubernetes <code>1.19</code></p><h3 id=what-are-virtual-kubernetes-clusters>What are Virtual Kubernetes Clusters?
+<a class=heading-link href=#what-are-virtual-kubernetes-clusters><i class="fa fa-link" aria-hidden=true></i></a></h3><p>Virtual clusters are fully working Kubernetes clusters that run on top of other Kubernetes clusters. Compared to fully separate &ldquo;real&rdquo; clusters, virtual clusters do not have their own node pools. Instead, they are scheduling workloads inside the underlying cluster while having their own separate control plane.</p><p>Now imagine this scenario. you provisioned your actual Kubernetes cluster a while back with version <code>1.19.15-do.0</code> and you want to upgrade it to the latest version. But, Before you make the jump you decided that you need to test your services on the newest k8s cluster first to make sure that it&rsquo;s working as expected. What will you do?
+Well&mldr; You have two options:</p><ol><li>Create a new Kubernetes cluster in DO with the latest version and test your services</li><li>Create a new virtual Kubernetes Clusters inside your current cluster and test your services inside it.</li></ol><p>In this article, we&rsquo;ll choose the second option. Mainly because it&rsquo;s the cheaper option and obviously we want to play with these shiny vClusters:)</p><h4 id=vcluster-cli>vcluster CLI
+<a class=heading-link href=#vcluster-cli><i class="fa fa-link" aria-hidden=true></i></a></h4><p>Now the first thing we need to do is install vCluster CLI. Instruction for installing it depends on the OS that you&rsquo;re using. <a href=https://www.vcluster.com/docs/getting-started/setup>vCluster documentions</a> explain it in depth.</p><p>After that, It&rsquo;s really easy to create a new vCluster. Just run this command:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ vcluster create vcluster-1 -n host-namespace-1 --k3s-image rancher/k3s:v1.22.4-k3s1
+</code></pre></div><p>it creates a vcluster in namespace <code>host-namespace-1</code> that can be accessed through port forwarding.</p><p>Now that we deployed a vcluster, let&rsquo;s connect to it.
+The easiest option to connect to your vcluster is by starting port-forwarding to the vcluster&rsquo;s service via:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ vcluster connect vcluster-1 -n host-namespace-1
+</code></pre></div><p>Note: If you terminate the <code>vcluster connect</code> command, port-forwarding will be terminated, so keep this command open while you are working with your vcluster.</p><p>Now you&rsquo;ll get a <code>kubeconfig.yaml</code> file in your current directory. You can use this file to connect to your vCluster.
+First export the new <code>kubeconfig.yaml</code></p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ export KUBECONFIG=./kubeconfig.yaml
+</code></pre></div><p>Then let&rsquo;s list the pods</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ kubectl get pod -A
+NAMESPACE     NAME                      READY   STATUS    RESTARTS   AGE
+kube-system   coredns-85cb69466-926hq   1/1     Running   0          4m45s
+
+</code></pre></div><p>From the above output, we can conclude that we using the vCluster. Finally!
+As you see there&rsquo;s only one pod <code>coredns</code> which is the DNS service that K8S uses.</p><p>Now let&rsquo;s check the version:</p><div class=highlight><pre style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fallback data-lang=fallback>$ kubectl version
+Client Version: version.Info{Major:&#34;1&#34;, Minor:&#34;22&#34;, GitVersion:&#34;v1.22.1&#34;, GitCommit:&#34;632ed300f2c34f6d6d15ca4cef3d3c7073412212&#34;, GitTreeState:&#34;clean&#34;, BuildDate:&#34;2021-08-19T15:38:26Z&#34;, GoVersion:&#34;go1.16.6&#34;, Compiler:&#34;gc&#34;, Platform:&#34;darwin/arm64&#34;}
+Server Version: version.Info{Major:&#34;1&#34;, Minor:&#34;22&#34;, GitVersion:&#34;v1.22.4+k3s1&#34;, GitCommit:&#34;bec170bc813e342cdba9710a1a71f8644c948770&#34;, GitTreeState:&#34;clean&#34;, BuildDate:&#34;2021-11-29T17:11:06Z&#34;, GoVersion:&#34;go1.16.10&#34;, Compiler:&#34;gc&#34;, Platform:&#34;linux/amd64&#34;}
+</code></pre></div><p>WoW. It&rsquo;s Kubernetes version <code>1.22</code>. If you remember our original cluster was using version <code>1.19</code>. So now you can test your application on this new cluster and make sure that it works on the latest Kubernetes version. Now that will help ease your mind when you upgrade your main cluster!</p></div><footer></footer></article></section></div><footer class=footer><section class=container>©
+2019 -
+2021
+Mohamed Hamza
+·
+Powered by <a href=https://gohugo.io/>Hugo</a> & <a href=https://github.com/luizdepra/hugo-coder/>Coder</a>.</section></footer></main><script src=/js/coder.min.a350362441276ec5c1671926420497bb8e52b63ead1d51d3c9bc4342d0039526.js integrity="sha256-o1A2JEEnbsXBZxkmQgSXu45Stj6tHVHTybxDQtADlSY="></script></body></html>
